@@ -4,9 +4,9 @@ import { ChatArea } from "./ChatArea";
 import { MessageInput } from "./MessageInput";
 import { BrowserCompatibilityBanner } from "./BrowserCompatibilityBanner";
 import { Button } from "./ui/button";
-import { Sun, Moon, Menu, X } from "lucide-react";
-import { useMonochrome } from "../context/MonochromeContext";
+import { Menu, X, ArrowLeft } from "lucide-react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export interface Message {
   id: string;
@@ -23,11 +23,26 @@ export interface Chat {
   updatedAt: Date;
 }
 
+// Format AI text into nicer bullets and sections
+const formatAIResponse = (text: string): string => {
+  if (!text) return text;
+  let s = text.replace(/\r\n/g, "\n").trim();
+  // Put headings (lines ending with :) on their own line and add spacing
+  s = s.replace(/(^|\n)([^\n:]+:)\s*/g, "$1$2\n");
+  // Convert star bullets to dot bullets, ensuring they start on a new line
+  s = s.replace(/(^|\n)\s*\*\s+/g, "$1• ");
+  // Ensure list items are each on their own line when stars were inline
+  s = s.replace(/\s+•\s+/g, "\n• ");
+  // Collapse excessive blank lines
+  s = s.replace(/\n{3,}/g, "\n\n");
+  return s;
+};
+
 export const ChatInterface = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-  const { isMonochrome, toggleMonochrome } = useMonochrome();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const createNewChat = () => {
@@ -94,11 +109,14 @@ export const ChatInterface = () => {
         query: content.trim(),
       });
 
+      const raw =
+        response?.data?.response ||
+        "Sorry, I couldn't process your request right now.";
+      const pretty = formatAIResponse(raw);
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content:
-          response?.data?.response ||
-          "Sorry, I couldn't process your request right now.",
+        content: pretty,
         type: "assistant",
         timestamp: new Date(),
       };
@@ -142,8 +160,17 @@ export const ChatInterface = () => {
 
       {/* Main Content */}
       <div className="flex flex-col flex-1 min-w-0">
-        {/* Top bar with Hamburger */}
+        {/* Top bar with Back button and Hamburger */}
         <div className="p-2 flex items-center gap-2 border-b border-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="w-8 h-8 p-0"
+            title="Go back"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -165,23 +192,6 @@ export const ChatInterface = () => {
         <ChatArea messages={messages} />
         <MessageInput onSendMessage={handleSendMessage} />
       </div>
-
-      {/* Theme Toggle Button - Bottom Right */}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={toggleMonochrome}
-        className="fixed bottom-4 right-4 w-10 h-10 p-0 rounded-full shadow-lg z-50"
-        title={
-          isMonochrome ? "Switch to Color Mode" : "Switch to Black & White Mode"
-        }
-      >
-        {isMonochrome ? (
-          <Sun className="w-4 h-4" />
-        ) : (
-          <Moon className="w-4 h-4" />
-        )}
-      </Button>
     </div>
   );
 };

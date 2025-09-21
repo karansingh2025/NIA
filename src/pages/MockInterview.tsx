@@ -9,6 +9,7 @@ import {
   MicOff,
   Volume2,
   VolumeX,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -686,6 +687,15 @@ export default function MockInterview() {
         <div className="max-w-8xl px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(-1)}
+                className="w-9 h-9 p-0 mr-2"
+                title="Go back"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <MessageSquare className="w-5 h-5 text-white" />
               </div>
@@ -800,7 +810,7 @@ export default function MockInterview() {
               {isMicListening && (
                 <div className="absolute -inset-3 rounded-full border-2 border-emerald-400/70 animate-pulse" />
               )}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center shadow-xl">
+              <div className="absolute inset-0 rounded-full bg-gradient-primary flex items-center justify-center shadow-xl">
                 <span className="text-white font-bold text-5xl">NIA</span>
               </div>
             </div>

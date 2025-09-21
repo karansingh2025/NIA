@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Mic, MicOff, HelpCircle } from "lucide-react";
+import { Send, Mic, MicOff, HelpCircle, Sun, Moon } from "lucide-react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { useToast } from "../hooks/use-toast";
 import { MicrophoneTest } from "./MicrophoneTest";
 import { TroubleshootingGuide } from "./TroubleshootingGuide";
-import axios from "axios";
+import { useMonochrome } from "../context/MonochromeContext";
 
 interface MessageInputProps {
   onSendMessage: (message: string) => void;
@@ -29,6 +29,7 @@ export const MessageInput = ({
   const [retryCount, setRetryCount] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
+  const { isMonochrome, toggleMonochrome } = useMonochrome();
 
   useEffect(() => {
     const initializeSpeechRecognition = async () => {
@@ -420,6 +421,27 @@ export const MessageInput = ({
 
   return (
     <div className="border-t border-border p-3 bg-card">
+      {/* Global theme toggle pinned to top-right */}
+      <div className="fixed top-2 right-4 z-50">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleMonochrome}
+          className="w-9 h-9 p-0"
+          title={
+            isMonochrome
+              ? "Switch to Color Mode"
+              : "Switch to Black & White Mode"
+          }
+        >
+          {isMonochrome ? (
+            <Sun className="w-5 h-5" />
+          ) : (
+            <Moon className="w-5 h-5" />
+          )}
+        </Button>
+      </div>
+
       <div className="flex gap-2 items-end max-w-4xl mx-auto">
         {!hideMicButton && (
           <Button
